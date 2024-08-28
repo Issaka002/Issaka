@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Phaser Game</title>
+    <style>
+        /* Optional CSS to ensure the canvas covers the full screen */
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <!-- Include the Phaser library from a CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.min.js"></script>
+    
+    <!-- Include your game script -->
+    <script src="main.js"></script>
+</body>
+</html>
