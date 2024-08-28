@@ -1,0 +1,104 @@
+import pygame
+import sys
+
+# Initialize Pygame
+pygame.init()
+
+# Constants
+SCREEN_WIDTH, SCREEN_HEIGHT = 800, 600
+TOWER_WIDTH, TOWER_HEIGHT = 50, 100
+CARD_WIDTH, CARD_HEIGHT = 60, 80
+ENERGY_BAR_WIDTH, ENERGY_BAR_HEIGHT = 200, 20
+ENERGY_MAX = 100
+ENERGY_REGEN = 1
+ENERGY_COST = 10
+GAME_TIME = 180  # 3 minutes in seconds
+CARD_DAMAGE = 20
+
+# Colors
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+
+# Set up the display
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Strategy Game")
+
+# Load tower and card images (placeholders)
+tower_image = pygame.Surface((TOWER_WIDTH, TOWER_HEIGHT))
+tower_image.fill(BLACK)
+card_image = pygame.Surface((CARD_WIDTH, CARD_HEIGHT))
+card_image.fill(RED)
+
+class Tower:
+    def __init__(self, x, y):
+        self.rect = pygame.Rect(x, y, TOWER_WIDTH, TOWER_HEIGHT)
+        self.health = 100
+
+    def draw(self):
+        screen.blit(tower_image, self.rect.topleft)
+
+    def take_damage(self, amount):
+        self.health -= amount
+        if self.health <= 0:
+            self.health = 0
+
+class Game:
+    def __init__(self):
+        self.tower1 = Tower(50, SCREEN_HEIGHT // 2 - TOWER_HEIGHT // 2)
+        self.tower2 = Tower(SCREEN_WIDTH - 100, SCREEN_HEIGHT // 2 - TOWER_HEIGHT // 2)
+        self.energy = ENERGY_MAX
+        self.card_selected = None
+        self.time_left = GAME_TIME
+        self.card_rect = pygame.Rect(SCREEN_WIDTH // 2 - CARD_WIDTH // 2, SCREEN_HEIGHT - CARD_HEIGHT - 10, CARD_WIDTH, CARD_HEIGHT)
+
+    def draw_energy_bar(self):
+        pygame.draw.rect(screen, BLACK, (50, SCREEN_HEIGHT - 50, ENERGY_BAR_WIDTH, ENERGY_BAR_HEIGHT))
+        pygame.draw.rect(screen, GREEN, (50, SCREEN_HEIGHT - 50, (self.energy / ENERGY_MAX) * ENERGY_BAR_WIDTH, ENERGY_BAR_HEIGHT))
+
+    def update(self, dt):
+        self.energy = min(self.energy + ENERGY_REGEN * dt, ENERGY_MAX)
+        self.time_left -= dt
+
+    def draw_time(self):
+        font = pygame.font.Font(None, 36)
+        time_text = font.render(f"Time Left: {int(self.time_left)}s", True, BLACK)
+        screen.blit(time_text, (SCREEN_WIDTH // 2 - time_text.get_width() // 2, 50))
+
+    def draw_card(self):
+        pygame.draw.rect(screen, BLACK, self.card_rect)
+        screen.blit(card_image, self.card_rect.topleft)
+
+    def deploy_card(self):
+        if self.energy >= ENERGY_COST:
+            self.energy -= ENERGY_COST
+            if self.card_selected == "attack":
+                self.tower2.take_damage(CARD_DAMAGE)
+
+def main():
+    clock = pygame.time.Clock()
+    game = Game()
+
+    while True:
+        dt = clock.tick(60) / 1000  # Amount of seconds between each loop
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if game.card_rect.collidepoint(event.pos):
+                    game.deploy_card()
+
+        screen.fill(WHITE)
+        game.update(dt)
+        game.draw_energy_bar()
+        game.draw_time()
+        game.tower1.draw()
+        game.tower2.draw()
+        game.draw_card()
+
+        pygame.display.flip()
+
+if __name__ == "__main__":
+    main()
